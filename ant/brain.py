@@ -38,6 +38,8 @@ def decide(ant, local, rng, cfg):
 def choose_direction(target, smell, last_action, rng, cfg):
     if target.sum() > 0:
         return toward(target)
+    if rng.random() < cfg.explore:
+        return wander(last_action, rng, cfg.keep_direction)
     smell = ignore_behind(smell, last_action)
     if smell.sum() > 0:
         return toward(smell)

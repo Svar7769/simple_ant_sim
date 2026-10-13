@@ -48,7 +48,7 @@ def save(path, position, carrying, cfg):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     np.savez_compressed(
         path,
-        pos=np.array(positions),        # (T, N, 2)
+        pos=np.array(position),        # (T, N, 2)
         carrying=np.array(carrying),    # (T, N)
         seed=cfg.seed,
     )
@@ -70,7 +70,7 @@ def main():
         plt.ion()
         fig, ax = plt.subplots(figsize=(6,6))
 
-    positons, carrying = [], []
+    positions, carrying = [], []
 
     for t in range(args.steps):
         sim.step()

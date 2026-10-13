@@ -15,11 +15,12 @@ class Config:
 
     #pheromone
     deposit: float = 1.0
-    deposit_decay: float = 0.000
-    evaporation: float = 0.01
+    deposit_decay: float = 0.01
+    evaporation: float = 0.001
     min_phe: float = 0.01 # below this phe is gone
 
     #random Walk
+    explore: float = 0.25 # chance of wandering off.
     keep_direction: float = 0.75 # pob of keeping the same direction
 
     # random seed

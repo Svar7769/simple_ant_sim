@@ -36,6 +36,7 @@ class Simulation:
         move(ant, decision.action, self.world)
         # mark
         drop_pheromone(ant, self.world)
+        # increment clock
         ant.steps_since_event += 1
 
     def state(self):
