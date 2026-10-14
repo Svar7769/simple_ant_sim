@@ -5,6 +5,16 @@ import numpy as np
 DIRECTIONS = [(0, 1), (0, -1), (-1, 0), (1, 0)] #up, down, left, right
 REVERSE = [1, 0, 3, 2]   # up<->down, left<->right
 
+# behavioural Modes
+MODE_TARGET = 0 # saw food or home and go there
+MODE_TRAIL = 1 # follow pheromone trail
+MODE_WANDER = 2 #Random Walk
+
+# ant actions
+EVENT_NONE = 0
+EVENT_PICK = 1
+EVENT_DROP = 2
+
 # move 360 degree
 def turn_around(ant):
     ant.last_action = ant.last_action[REVERSE]

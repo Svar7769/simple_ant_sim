@@ -11,12 +11,15 @@ class World:
         self.home_phe = np.zeros((W,H))
         self.food_phe = np.zeros((W,H))
         self.food_delivered = 0
+        self.food_patches = [] # for meta data.
 
         nx, ny = cfg.nest
         self._fill_circle(self.home, nx, ny, cfg.nest_radius, 1.0)
 
     def add_food(self, x, y, radius, amount_per_cell):
         self._fill_circle(self.food, x, y, radius, amount_per_cell)
+        self.food_patches.append(dict(x=x, y=y, radius=radius, 
+                                      amount_per_cell = amount_per_cell))
 
     def update(self):
         # evaporate phe per step

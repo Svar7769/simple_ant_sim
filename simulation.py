@@ -7,6 +7,7 @@ from ant.sense import sense
 from ant.brain import decide
 from ant.move import move
 from ant.ant_utils import pick_food, drop_food, drop_pheromone
+from ant.ant_utils import EVENT_NONE, EVENT_PICK, EVENT_DROP
 
 class Simulation:
     def __init__(self, cfg):
@@ -27,11 +28,23 @@ class Simulation:
         local = sense(ant, self.world)
         #decide
         decision = decide(ant, local, self.rng, self.cfg)
+        
+        ant.mode = decision.mode
+        ant.event = EVENT_NONE
+
         #act
+        was_carrying = ant.carrying 
         if decision.pick:
             pick_food(ant, self.world)
         elif decision.drop:
             drop_food(ant, self.world)
+
+        # Event Log
+        if ant.carrying and not was_carrying:
+            ant.event = EVENT_PICK
+        elif was_carrying and not ant.carrying:
+            ant.event = EVENT_DROP
+
         # Move ant
         move(ant, decision.action, self.world)
         # mark

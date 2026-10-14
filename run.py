@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 
 from config import Config
 from simulation import Simulation
+from collectors.config import CollectorConfig
+from collectors.simple_collector import SimpleCollector
+
 
 def make_sim(cfg):
     sim = Simulation(cfg)
@@ -61,10 +64,13 @@ def main():
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--draw_every", type=int, default=10)
     parser.add_argument("--save", type=str, default=None)
+    parser.add_argument("--name", type=str, default="")
     args = parser.parse_args()
 
     cfg = Config(seed=args.seed)
     sim = make_sim(cfg)
+
+    collector = SimpleCollector(CollectorConfig(run_name=args.name))
 
     if not args.headless:
         plt.ion()
@@ -74,6 +80,7 @@ def main():
 
     for t in range(args.steps):
         sim.step()
+        collector.record(sim)
 
         if args.save:
             pos, carry = sim.state()
@@ -88,7 +95,8 @@ def main():
             plt.pause(0.001)
             if not plt.fignum_exists(fig.number):
                 break
-
+    
+    collector.save(sim)
     print(f"Done! food delivered: {sim.world.food_delivered}")
 
     if args.save:
