@@ -9,7 +9,7 @@ class Config:
     nest_radius: int = 3
 
     #ants
-    n_ants: int =10 # number of ants
+    n_ants: int =100 # number of ants
     speed: float = 1.0 # how many steps we can move
     sense_radius: int = 3 # how much we can sense ahead
 
