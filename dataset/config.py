@@ -54,6 +54,17 @@ SELF_FEATURES = ["on_food", "at_home", "carrying"]
 LABELS = ["mode", "direction", "pick", "drop"]
 INFO = ["case", "behind", "tie", "food_present", "run", "t", "ant"]
 
+PROBES = [
+    "gate_target",    # target in carried-relevant channel vs other channel   -> follow relevant
+    "gate_smell",     # same for smell                                         -> follow relevant
+    "priority",       # target in dir a, stronger smell in dir b               -> target wins
+    "argmax_target",  # several distinct food targets                          -> largest
+    "argmax_smell",   # several distinct smells (none behind)                  -> largest
+    "behind",         # strongest smell is behind                              -> second strongest
+    "tie",            # two equal maxima                                       -> first index (up,down,left,right)
+    "nothing",        # nothing ahead (smell only behind or none)              -> wander
+    "pick_drop",      # on_food / at_home x carrying                           -> pick, drop rules
+]
 
 @dataclass
 class DatasetConfig:
@@ -77,3 +88,15 @@ class DatasetConfig:
 
 
 CFG = DatasetConfig()
+
+@dataclass
+class SynthConfig:
+    n_per_probe: int = 5000
+    seed: int = 0
+    onehot_last_action_frac: float = 0.7    # rest are continuous wander-style vectors
+    food_values: tuple = (1, 6)             # see_food reads food per cell (integers)
+    smell_range: tuple = (0.01, 1.0)        # pheromone strengths
+    min_gap: float = 0.02                   # smallest gap between max and runner-up (no accidental ties)
+
+
+SYNTH = SynthConfig()

@@ -56,14 +56,7 @@ class BrainData:
     def labels(self):
         return {k: self.a[k] for k in LABELS}
 
-        def sample_weights(self, group_frac=None):
-        """Per-row weights for a weighted sampler.
-        Groups: case 0 (target), case 1 (smell), case 2 (nothing), 3 (pick/drop rows).
-        Each group is drawn with probability group_frac.
-
-        Balances by CASE only, never by mode: inside case 1 the trail/wander
-        split must stay at its natural 0.75/0.25, or the model learns a wrong
-        explore rate."""
+    def sample_weights(self, group_frac=None):
         group_frac = CFG.group_frac if group_frac is None else group_frac
         group = self.a["case"].astype(np.int64).copy()
         group[self.a["pick"] | self.a["drop"]] = 3
