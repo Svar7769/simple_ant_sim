@@ -55,3 +55,47 @@ class ModelConfig:
 
 
 MODEL = ModelConfig()
+
+# ---------------- training (python -m model.train) ----------------
+from dataset.config import CFG as DATA_CFG
+
+
+@dataclass
+class TrainConfig:
+    # data
+    data_dir: str = DATA_CFG.out_dir
+    train_fraction: float = 1.0      # < 1: train on a random subset (grokking experiments)
+    balanced: bool = True            # sample by case (see BrainData.sample_weights)
+
+    # optimisation
+    steps: int = 20000
+    batch_size: int = 4096
+    lr: float = 1e-3
+    weight_decay: float = 0.1        # 1.0 underfit trail direction in short CPU tests; sweep 0, 0.1, 1.0
+    beta1: float = 0.9
+    beta2: float = 0.98
+    warmup_steps: int = 200          # linear warmup, then constant lr
+    grad_clip: float = 1.0           # 0 = off
+
+    # loss weights
+    w_mode: float = 1.0
+    w_dir: float = 1.0
+    w_pick: float = 1.0
+    w_drop: float = 1.0
+
+    # evaluation, logging, checkpoints
+    eval_every: int = 500
+    eval_rows: int = 200_000         # val rows used at each eval (fixed random subset)
+    n_ckpt: int = 30                 # log-spaced checkpoints (+ final)
+    tensorboard: bool = False        # also write TensorBoard logs (needs `pip install tensorboard`)
+    out_root: str = "outputs"
+    run_name: str = ""               # empty: <arch>_wd<wd>_<timestamp>
+
+    seed: int = 0
+    device: str = "auto"             # "auto", "cuda", "cpu"
+
+    def to_dict(self):
+        return asdict(self)
+
+
+TRAIN = TrainConfig()
