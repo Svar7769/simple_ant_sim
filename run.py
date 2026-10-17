@@ -11,10 +11,30 @@ from collectors.config import CollectorConfig
 from collectors.simple_collector import SimpleCollector
 
 
-def make_sim(cfg):
+def make_sim(cfg, random_food=False, n_patches=2, food_seed=None):
     sim = Simulation(cfg)
-    sim.world.add_food(80, 80, radius=4, amount_per_cell = 5)
-    sim.world.add_food(20, 75, radius=4, amount_per_cell = 5)
+    if not random_food:
+        sim.world.add_food(80, 80, radius=4, amount_per_cell = 5)
+        sim.world.add_food(20, 75, radius=4, amount_per_cell = 5)
+        return sim
+
+    # separate rng so food layout does not change the ants' random stream
+    rng = np.random.default_rng(cfg.seed + 10_000 if food_seed is None else food_seed)
+    nx, ny = cfg.nest
+    placed = []
+    tries = 0
+    while len(placed) < n_patches and tries < 1000:
+        tries += 1
+        r = int(rng.integers(3, 6))                  # radius 3..5
+        x = int(rng.integers(r + 1, cfg.width - r - 1))
+        y = int(rng.integers(r + 1, cfg.height - r - 1))
+        if np.hypot(x - nx, y - ny) < 20:            # not too close to the nest
+            continue
+        if any(np.hypot(x - px, y - py) < r + pr + 4 for px, py, pr in placed):
+            continue                                 # no overlapping patches
+        amount = int(rng.integers(3, 7))             # 3..6 food per cell
+        sim.world.add_food(x, y, radius=r, amount_per_cell=amount)
+        placed.append((x, y, r))
     return sim
 
 def draw(ax, sim):
@@ -59,18 +79,22 @@ def save(path, position, carrying, cfg):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=3000)
+    parser.add_argument("--steps", type=int, default=1500)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--draw_every", type=int, default=10)
     parser.add_argument("--save", type=str, default=None)
     parser.add_argument("--name", type=str, default="")
+    parser.add_argument("--out_dir", type=str, default="runs")
+    parser.add_argument("--n_ants", type=int, default=100)
+    parser.add_argument("--random_food", action="store_true")
+    parser.add_argument("--n_patches", type=int, default=2)
     args = parser.parse_args()
 
-    cfg = Config(seed=args.seed)
-    sim = make_sim(cfg)
+    cfg = Config(seed=args.seed, n_ants=args.n_ants)
+    sim = make_sim(cfg, random_food=args.random_food, n_patches=args.n_patches)
 
-    collector = SimpleCollector(CollectorConfig(run_name=args.name))
+    collector = SimpleCollector(CollectorConfig(out_dir=args.out_dir, run_name=args.name))
 
     if not args.headless:
         plt.ion()

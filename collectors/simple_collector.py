@@ -29,6 +29,12 @@ class SimpleCollector:
         self.food_phe = []
         self.home_phe = []
         self.food = []
+
+        # Internal Data
+        self.obs = []
+        self.dec_action = []
+        self.dec_pick = []
+        self.dec_drop = []
     
     # after every simulation step
     def record(self, sim):
@@ -44,6 +50,10 @@ class SimpleCollector:
             self.event.append([a.event for a in ants])
             self.delivered.append(sim.world.food_delivered)
             self.food_left.append(sim.world.food.sum())
+            self.obs.append([a.obs for a in ants])
+            self.dec_action.append([a.dec_action for a in ants])
+            self.dec_pick.append([a.dec_pick for a in ants])
+            self.dec_drop.append([a.dec_drop for a in ants])
 
         if self.cfg.save_grids and t % self.cfg.snapshot_every == 0:
             w = sim.world
@@ -65,6 +75,10 @@ class SimpleCollector:
             event = np.array(self.event, dtype=np.int8),
             delivered = np.array(self.delivered, dtype=np.int32),
             food_left = np.array(self.food_left, dtype=np.float32),
+            obs = np.array(self.obs, dtype=np.float32),                # (T, N, 23)
+            dec_action = np.array(self.dec_action, dtype=np.float32),  # (T, N, 4)
+            dec_pick = np.array(self.dec_pick, dtype=bool),            # (T, N)
+            dec_drop = np.array(self.dec_drop, dtype=bool),            # (T, N)
         )
 
         if self.cfg.save_grids:
@@ -84,13 +98,20 @@ class SimpleCollector:
                 n_ants=len(sim.ants),
                 created=time.strftime("%Y-%m-%d %H:%M:%S"),
                 modes={"0": "target", "1": "trail", "2": "wander"},
-                events={"0": "none", "1": "pick", "2": "drop"},    
+                events={"0": "none", "1": "pick", "2": "drop"},
+                obs_layout=["on_food", "at_home", "carrying",
+                            "see_food_u", "see_food_d", "see_food_l", "see_food_r",
+                            "see_home_u", "see_home_d", "see_home_l", "see_home_r",
+                            "smell_food_u", "smell_food_d", "smell_food_l", "smell_food_r",
+                            "smell_home_u", "smell_home_d", "smell_home_l", "smell_home_r",
+                            "last_action_u", "last_action_d", "last_action_l", "last_action_r"],
             )
+        
         with open(os.path.join(run_dir, "meta.json"), "w") as f:
             json.dump(meta, f, indent=3)
 
-            print("saved", run_dir)
-            return run_dir
+        print("saved", run_dir)
+        return run_dir
 
     def _run_name(self, sim):
         if self.cfg.run_name:
