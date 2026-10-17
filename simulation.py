@@ -31,6 +31,19 @@ class Simulation:
         
         ant.mode = decision.mode
         ant.event = EVENT_NONE
+        
+        ant.obs = np.concatenate([
+            [local.on_food, local.at_home, ant.carrying],
+            local.see_food, local.see_home,
+            local.smell_food, local.smell_home,
+            ant.last_action,
+        ]).astype(np.float32)
+        ant.dec_action = np.asarray(decision.action, dtype=np.float32).copy()
+        ant.dec_pick = bool(decision.pick)
+        ant.dec_drop = bool(decision.drop)
+
+        ant.mode = decision.mode
+        ant.event = EVENT_NONE
 
         #act
         was_carrying = ant.carrying 
@@ -51,17 +64,6 @@ class Simulation:
         drop_pheromone(ant, self.world)
         # increment clock
         ant.steps_since_event += 1
-
-        # Saving data for the transformer
-        ant.obs = np.concatenate([
-            [local.on_food, local.at_home, ant.carrying],
-            local.see_food, local.see_home,
-            local.smell_food, local.smell_home,
-            ant.last_action,
-        ]).astype(np.float32)
-        ant.dec_action = np.asarray(decision.action, dtype=np.float32).copy()
-        ant.dec_pick = bool(decision.pick)
-        ant.dec_drop = bool(decision.drop)
 
     def state(self):
         pos = np.array([a.pos for a in self.ants])
